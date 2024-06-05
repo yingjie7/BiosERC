@@ -1,8 +1,6 @@
-## AccumWR: Accumulating Word Representations in Multi-level Context Integration for ERC Task 
+## BiosERC: Integrating Biography Speakers Supported by LLMs for ERC Tasks
+In the Emotion Recognition in Conversation task, recent investigations have utilized attention mechanisms exploring relationships among utterances from intra- and inter-speakers for modeling emotional interaction between them. However, attributes such as speaker personality traits remain unexplored and present challenges in terms of their applicability to other tasks or compatibility with diverse model architectures. Therefore, this work introduces a novel framework named BiosERC, which investigates speaker characteristics in a conversation. By employing Large Language Models (LLMs), we extract the ``biographical information'' of the speaker within a conversation as supplementary knowledge injected into the model to classify emotional labels for each utterance. Our proposed method achieved state-of-the-art (SOTA) results on three famous benchmark datasets: IEMOCAP, MELD, and EmoryNLP, demonstrating the effectiveness and generalization of our model and showcasing its potential for adaptation to various conversation analysis tasks.
 
-Emotion Recognition in Conversations (ERC) has attracted increasing attention recently because of its high applicability, which is to predict the sentiment label of each utterance given a conversation as context.    
-In order to identify the emotion of a focal sentence, it is crucial to model its meaning fused with contextual information. Many recent studies have focused on capturing different types of context as supporting information and integrated it in various ways: local and global contexts or at the speaker level through intra-speaker and inter-speaker integration. However, the importance of word representations after context integration has not been investigated completely, while word information is also essential to reflect the speaker's emotions in the conversation.
-Therefore, in this paper, we investigate the effect of accumulating word vector representations on sentence modeling fused with multi-level contextual integration.  To this end, we propose an effective method for sentence modeling in ERC tasks and achieve competitive state-of-the-art results on four well-known benchmark datasets: Iemocap, MELD, EmoryNLP, and DailyDialog.  
 ## Results 
 Performance comparison between our proposed method and previous works on the test sets.
 |                                                 |    |         |              |           |
@@ -14,12 +12,12 @@ Performance comparison between our proposed method and previous works on the tes
  DialogueEIN             |                          | 68.93                | 38.92                 | 65.37             
  SGED + DAG-ERC                      |                          | 68.53                | 40.24                 | 65.46             
  S+PAGE                         |                          | 68.93                | 40.05                 | 64.67             
- InstructERC   _+(ft LLM)_ |                          | $\textbf{71.39}$       | 41.39                 | 69.15      
-|       
- Intra/inter ERC (baseline)   $\texttt{[AccWR]}_{MLP}$       |     | 67.65                | 39.33                 | 64.58             
- $\texttt{BiosERC}_\texttt{ BERT-based}$           |      | 67.79                | 39.89      | 65.51 
-  $\texttt{BiosERC}$  +ft LLM $_\texttt{Llama-2-7b}$  |     | 69.02              | 41.44            | 68.72          
-  $\texttt{BiosERC}$  +ft LLM $_\texttt{Llama-2-13b}$ |       | 71.19              | $\textbf{41.68}$        | $\textbf{69.83}$    
+ InstructERC   _+(ft LLM)_ |                          |  **71.39**      | 41.39                 | 69.15      
+|                                                 |    |         |              |           |
+ Intra/inter ERC (baseline)   ${[AccWR]}_{MLP}$       |     | 67.65                | 39.33                 | 64.58             
+ _BiosERC_ $_{  BERT-based}$           |      | 67.79                | 39.89      | 65.51 
+  _BiosERC_  +ft LLM $_{Llama-2-7b}$  |     | 69.02              | 41.44            | 68.72          
+  _BiosERC_   +ft LLM $_{Llama-2-13b}$ |       | 71.19              | **41.68**        | **69.83**  
 |                                                 |    |         |              |           |
 
 ##  Data  
