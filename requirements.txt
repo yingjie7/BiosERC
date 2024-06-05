@@ -1,0 +1,13 @@
+pytorch-lightning
+torch
+huggingface
+lightning
+accelerate
+bitsandbytes
+datasets
+peft
+trl
+scikit-learn
+flash-attn
+tensorboard
+tensorboardX
