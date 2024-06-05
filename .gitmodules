@@ -1,3 +1,4 @@
 [submodule "src/baseline"]
 	path = src/baseline
 	url = https://github.com/yingjie7/per_erc.git
+	branch = AccumWR
