@@ -1,0 +1,43 @@
+{
+    // 使用 IntelliSense 了解相关属性。 
+    // 悬停以查看现有属性的描述。
+    // 欲了解更多信息，请访问: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "prac",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/src/reformat_data_ft_llm.py",
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
+            "name": "ft_llm",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/src/ft_llm.py",
+            "cwd": "${workspaceFolder}/",
+            "args": [
+                "--do_eval_dev",
+                "--do_eval_test",
+                "--do_train",
+                "--base_model_id", "meta-llama/Llama-2-7b-hf",
+                "--ft_model_id",
+                "debug",
+                "--lr_scheduler", "linear",
+                "--lr", "3e-4",
+                "--epoch","3",
+                "--lora_r", "32",
+                "--kshot", "0" ,
+                "--window", "5" ,
+                "--data_name", "iemocap" ,
+                "--prompting_type","fewshot-similar-default",
+                "--extract_prompting_llm_id","Llama-2-70b-chat-hf",
+                "--re_gen_data"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": true
+        } 
+    ]
+}

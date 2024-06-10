@@ -1,20 +1,18 @@
 import argparse
 import json
-import re
-import traceback 
 from datasets import load_dataset
 import torch
-from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig, TrainingArguments, AutoConfig
+from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig, TrainingArguments
 from trl import setup_chat_format, set_seed as trl_seed
-from peft import LoraConfig, AutoPeftModelForCausalLM, get_peft_model
+from peft import LoraConfig, AutoPeftModelForCausalLM 
 from trl import SFTTrainer
-from transformers import pipeline, set_seed as transf_seed
+from transformers import set_seed as transf_seed
 from tqdm import tqdm
 from sklearn.metrics import f1_score
 import numpy as np 
 from torch.utils.data import DataLoader
 from transformers.trainer_utils import EvalLoopOutput
-import random, os, glob
+import random, glob
 from lightning import seed_everything 
 
 from reformat_data_ft_llm import process
@@ -30,79 +28,6 @@ def set_random_seed(seed: int):
     torch.backends.cudnn.benchmark = False
     trl_seed(seed)
     transf_seed(seed)
-    
-
-def test_ft_model(ft_model_path, data_path, file_result_out=None, prompting_type=None):
-
-    ft_model_id = ft_model_path
-    peft_model_id = ft_model_id
-    tokenizer = AutoTokenizer.from_pretrained(f"{ft_model_id}/")
-    tokenizer.padding_side = 'left' 
-
-    # Load Model with PEFT adapter
-    model = AutoPeftModelForCausalLM.from_pretrained(
-        peft_model_id,
-        device_map="auto",
-        torch_dtype=torch.float16
-    )
-    # load into pipeline
-    pipe = pipeline("text-generation", model=model, tokenizer=tokenizer)
-
-
-    def evaluate_2(samples):
-        prompt = [pipe.tokenizer.apply_chat_template(
-            sample["messages"][:-1], tokenize=False, add_generation_prompt=True) for sample in samples]
-        outputs = pipe(prompt, max_new_tokens=256, do_sample=False,
-                    eos_token_id=pipe.tokenizer.eos_token_id,
-                    pad_token_id=pipe.tokenizer.pad_token_id,
-                    batch_size=4)
-        predicted_answers = [output[0]['generated_text']
-                            [len(prompt[i]):].strip() for i, output in enumerate(tqdm(outputs))]
-        gold_answers = [sample["messages"][-1]['content'] for sample in samples]
-        
-        correct_preds = [e == gold_answers[i]
-                        for i, e in enumerate(predicted_answers)]
-        return list(zip(correct_preds, predicted_answers, gold_answers, prompt))
-
-
-    eval_dataset = load_dataset(
-        "json", data_files=data_path, split="train")
-
-    # number_of_eval_samples = 1000
-    # all_s = [s for s in tqdm(eval_dataset.shuffle().select(
-    #     range(number_of_eval_samples)))]
-
-    all_s = [s for s in eval_dataset]
-
-    output_preds = evaluate_2(all_s[:])
-    log_results = [{
-        'correct': e[0],
-        'q_output': e[1],
-        'gold_label': e[2],
-        'q_input': e[3],
-    } for e in output_preds]
-
-    if file_result_out is None:
-        file_result_out = f'{ft_model_path}/predicted_results.json'
-        
-    json.dump(log_results, open(f'{file_result_out}', 'wt', encoding='utf-8'), indent=2)
-
-    # compute accuracy
-    f1_weighted = f1_score(
-        [e['gold_label'] for e in log_results],
-        [e['q_output'] for e in log_results],
-        average="weighted",
-    )
-    print(f"Weighted-f1: {f1_weighted*100:.2f}%")
-    
-    json.dump({ "weighted-f1": f1_weighted,
-               'wrong_pred': [e for e in log_results if not e['correct']]
-               }, open(f'{file_result_out.replace(".json", ".performance.json")}', 'wt', encoding='utf-8'), indent=2)
-    
-    # free the memory again
-    del model
-    del pipe
-    torch.cuda.empty_cache()
     
 
 def formatting_prompts_func(samples):
@@ -255,6 +180,8 @@ if __name__=='__main__':
     parser.add_argument('--max_seq_len', type=int, default=None, help='max sequence length for chunking/packing')
     parser.add_argument('--re_gen_data', action="store_true", help='re generate data', default=False)
     parser.add_argument('--data_name', type=str,  help='data name in {iemocap, meld, emorynlp}', default='iemocap')
+    parser.add_argument('--data_folder', type=str,  help='path folder save all data', default='./data/')
+    parser.add_argument('--output_folder', type=str,  help='path folder save all data', default='./finetuned_llm/')
 
     args, unknown = parser.parse_known_args()
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -264,26 +191,15 @@ if __name__=='__main__':
     
     set_random_seed(args.seed)
     
-    data_path_format = f"/home/s2220429/per_erc/data/all_raw_data/{args.data_name}.train.{args.kshot}shot_w{args.window}_{args.prompting_type}.jsonl"
+    all_path_folder_preprocessed_data = [f"{args.data_folder}/{args.data_name}.{d_type}.{args.kshot}shot_w{args.window}_{args.prompting_type}.jsonl" \
+        for d_type in [ 'train' , 'valid',  'test']]
     if args.re_gen_data:
-        # convert data  
-        for d_type in [ 'train' , 'valid',  'test']:
-            process(d_type, folder_data='/home/s2220429/per_erc/data/all_raw_data', 
-                    around_window=args.window, 
-                    data_name= args.data_name, 
-                    path_data_out=data_path_format.replace(".train.", f".{d_type}."), 
-                    prompting_type=args.prompting_type,
-                    extract_prompting_llm_id = args.extract_prompting_llm_id
-                    ) 
-                
-                
-    ft_model_id = args.ft_model_id
-    output_dir=f'./finetuned_llm/{ft_model_id}'
-    
+        process(all_path_folder_preprocessed_data, args) 
+                    
     # Load jsonl data from disk
-    dataset = load_dataset("json", data_files=data_path_format, split="train", cache_dir=output_dir)
-    valid_dataset = load_dataset("json", data_files=data_path_format.replace(".train.", ".valid."), split="train", cache_dir=output_dir)
-    test_dataset = load_dataset("json", data_files=data_path_format.replace(".train.", ".test."), split="train", cache_dir=output_dir)
+    dataset = load_dataset("json", data_files=all_path_folder_preprocessed_data[0], split="train", cache_dir=f'{args.output_folder}/{args.ft_model_id}')
+    valid_dataset = load_dataset("json", data_files=all_path_folder_preprocessed_data[1], split="train", cache_dir=f'{args.output_folder}/{args.ft_model_id}')
+    test_dataset = load_dataset("json", data_files=all_path_folder_preprocessed_data[2], split="train", cache_dir=f'{args.output_folder}/{args.ft_model_id}')
     
 
     # Load model and tokenizer
@@ -311,7 +227,7 @@ if __name__=='__main__':
             )
     else:
         tensor_data_type = torch.float32 # for reduce the miss matching of ouputs of batch inference
-        ft_model_path = f"{args.output_dir}/{args.ft_model_id}" if args.ft_model_path is None else args.ft_model_path
+        ft_model_path = f"{args.output_folder}/{args.ft_model_id}" if args.ft_model_path is None else args.ft_model_path
         tokenizer = AutoTokenizer.from_pretrained(ft_model_path)
         model = AutoPeftModelForCausalLM.from_pretrained(
             ft_model_path,
@@ -338,7 +254,7 @@ if __name__=='__main__':
     )
 
     training_args = TrainingArguments(
-        output_dir=output_dir,                  # directory to save and repository id
+        output_dir=f'{args.output_folder}/{args.ft_model_id}',                  # directory to save and repository id
         num_train_epochs= args.epoch,                     # number of training epochs
         max_steps=args.max_steps,
         per_device_train_batch_size=4,          # batch size per device during training
@@ -389,27 +305,18 @@ if __name__=='__main__':
     if args.do_train:
         # start training, the model will be automatically saved to the hub and the output directory
         # trainer.train(ignore_keys_for_eval=[])
-        trainer.train(resume_from_checkpoint=True if len(glob.glob(f'{output_dir}/checkpoint-*')) > 0 else None)
+        trainer.train(resume_from_checkpoint=True if len(glob.glob(f'{args.output_folder}/{args.ft_model_id}/checkpoint-*')) > 0 else None)
 
         # save model 
         trainer.save_model()
         
 
-    ft_model_path = f"./finetuned_llm/{args.ft_model_id}" if args.ft_model_path is None else args.ft_model_path
+    ft_model_path = f'{args.output_folder}/{args.ft_model_id}' if args.ft_model_path is None else args.ft_model_path
         
     if args.do_eval_test:
         result = trainer.evaluate(test_dataset, metric_key_prefix='test')
-        print(f"Test result = {result}")
-        # test_ft_model(ft_model_path=ft_model_path, 
-        #               data_path=data_path_format.replace(".train.",".test."),
-        #               file_result_out=f'{ft_model_path}/predicted_test_results.json',
-        #               prompting_type=args.prompting_type)
+        print(f"Test result = {result}") 
         
     if args.do_eval_dev:
         result = trainer.evaluate(valid_dataset, metric_key_prefix='valid')
-        print(f"Valid result = {result}")
-        # test_ft_model(ft_model_path=ft_model_path, 
-        #               data_path=data_path_format.replace(".train.",".valid."),
-        #               file_result_out=f'{ft_model_path}/predicted_valid_results.json',
-        #               prompting_type=args.prompting_type)
-        
+        print(f"Valid result = {result}") 
