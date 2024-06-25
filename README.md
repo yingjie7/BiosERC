@@ -109,7 +109,7 @@ Init python environment
 
 ## Citation 
    
-    ```bibtex
+```bibtex
     @InProceedings{bioserc,
     author="Xue, Jieying
     and Nguyen, Minh-Phuong
@@ -125,4 +125,4 @@ Init python environment
     isbn="[updating]"
     }
 
-    ```
+```
