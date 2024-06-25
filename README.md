@@ -109,4 +109,20 @@ Init python environment
 
 ## Citation 
    
-    [updating]
+    ```bibtex
+    @InProceedings{bioserc,
+    author="Xue, Jieying
+    and Nguyen, Minh-Phuong
+    and Matheny, Blake
+    and Nguyen, Le-Minh",
+    editor="[updating]",
+    title="BiosERC: Integrating Biography Speakers Supported by LLMs for ERC Tasks",
+    booktitle="Artificial Neural Networks and Machine Learning -- ICANN 2024",
+    year="2024",
+    publisher="Springer Nature Switzerland",
+    address="Cham",
+    pages="[updating]", 
+    isbn="[updating]"
+    }
+
+    ```
