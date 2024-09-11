@@ -370,7 +370,7 @@ class BatchPreprocessorLLMSpeakerDescription(BatchPreprocessor):
 raw_data = []
 for type_data in ['valid', 'test', 'train']:
     data_name_pattern = f'{dataset_name}.{type_data}'
-    path_processed_data = f'{data_folder}/llm_vectors/{data_name_pattern}_{prompt_type}_{model_name.split("/")[-1]}.json'
+    path_processed_data = f'{data_folder}/{data_name_pattern}_{prompt_type}_{model_name.split("/")[-1]}.json'
 
     org_raw_data = BatchPreprocessorLLMSpeakerDescription.load_raw_data(
         f"{data_folder}/{data_name_pattern}.json")
@@ -437,7 +437,7 @@ for len_promting, speaker_promts in tqdm(gr_by_len.items()):
 
 for type_data in ['valid', 'test', 'train']:
     data_name_pattern = f'{dataset_name}.{type_data}'
-    path_processed_data = f'{data_folder}/llm_vectors/{data_name_pattern}_{prompt_type}_{model_name.split("/")[-1]}.json'
+    path_processed_data = f'{data_folder}/{data_name_pattern}_{prompt_type}_{model_name.split("/")[-1]}.json'
 
     processed_data = {}
     if os.path.exists(path_processed_data):
