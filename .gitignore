@@ -1,4 +1,6 @@
 data/
+.history/
 finetuned_llm/
 **.log
 **/__pycache__/
+**events.out.tfevents.*

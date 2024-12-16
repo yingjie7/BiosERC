@@ -140,7 +140,7 @@ def process(paths_folder_preprocessed_data, args):
         
         # if use speaker description -> load raw data and preprocess
         if prompting_type not in ["default" ]:
-            desc_speaker_data = json.load(open(f'{folder_data}/llm_vectors/{data_name}.{d_type}_{prompting_type}_{extract_prompting_llm_id}.json'))
+            desc_speaker_data = json.load(open(f'{folder_data}/{data_name}.{d_type}_{prompting_type}_{extract_prompting_llm_id}.json'))
             processed_desc_speaker_data = {}
             if desc_speaker_data is not None and "spdesc" in prompting_type:
                 for s_id, desc_all_conv in desc_speaker_data.items():

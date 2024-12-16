@@ -110,7 +110,17 @@ Init python environment
     bash scrips/train_llm.sh # to train a llm model
     ```
     > **Note**: Please check this scripts to check the setting and choose which data you want to run. 
-
+    
+4. Infer trained model from huggingface
+    Download model and data from [https://huggingface.co/phuongnm94/BiosERC](https://huggingface.co/phuongnm94/BiosERC) 
+    ```bash 
+    bash scrips/infer.sh # to infer a llm-based BiosERC: Llama-13b
+    ```
+    or run 
+    ```bash 
+    infer_bioserc_bertbased.ipynb # to infer BiosERC bert based model 
+    ```
+    > **Note**: Please check all the path of data and models related.
 ## Citation 
    
 ```bibtex
@@ -134,3 +144,8 @@ Init python environment
 }
 
 ```
+
+## Licensing Information
+- **MELD**: Licensed under [GPL-3.0](https://www.gnu.org/licenses/gpl-3.0.en.html).
+- **EMORYNLP**: Licensed under [Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0).
+- **IEMOCAP**: Licensed under a non-commercial research license. Refer to the official [IEMOCAP website](https://sail.usc.edu/iemocap/) for terms of use.
