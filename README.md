@@ -21,9 +21,9 @@ Performance comparison between our proposed method and previous works on the tes
 | InstructERC   _+(ft LLM)_                      |       |  **71.39**  |    41.39     |   69.15   |
 |                                                |       |             |              |           |
 | Intra/inter ERC (baseline)   ${[AccWR]}_{MLP}$ |       |    67.65    |    39.33     |   64.58   |
-| _BiosERC_ $_{  BERT-based}$                    |       |    67.79    |    39.89     |   65.51   |
-| _BiosERC_  +ft LLM $_{Llama-2-7b}$             |       |    69.02    |    41.44     |   68.72   |
-| _BiosERC_   +ft LLM $_{Llama-2-13b}$           |       |    71.19    |  **41.68**   | **69.83** |
+|  ${BiosERC}_{BERT-based}$                    |       |    67.79    |    39.89     |   65.51   |
+|  ${BiosERC + LoRA}_{Llama-2-7b}$             |       |    69.02    |    41.44     |   68.72   |
+|  ${BiosERC + LoRA}_{Llama-2-13b}$           |       |    71.19    |  **41.68**   | **69.83** |
 |                                                |       |             |              |           |
 
 ##  Data  
